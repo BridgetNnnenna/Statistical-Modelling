@@ -1,0 +1,146 @@
+---
+title: "Statistically Modelling the Impact of Macroeconomic factors on the Economic growth in the United States using Linear Regression"
+author: "Bridget _Chukwu"
+date: "June 20, 2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Uploading the data and cleaning the data 
+
+```{r}
+rm(list=ls())
+getwd()
+setwd("C:\\Users\\bridget.chukwu\\Documents\\Summer Course STAT\\STAT 711\\Final Project")
+library(readxl)
+data <- read_excel("Data for final Project.xlsx")
+meaningful_columns <- c("Year", "GDP per capita growth (annual %)", "FDI(% of GDP)", "Real interest rate (%)", "Tax revenue (% of GDP)")
+cleaned_data <- data[meaningful_columns]
+data<-cleaned_data 
+data<-na.omit(data)
+dim(data)
+head(data)
+names(data)
+data
+nrow(data)
+ncol(data)
+FDI<-data$"FDI(% of GDP)"
+GDP<-data$"GDP per capita growth (annual %)"
+TAX<-data$"Tax revenue (% of GDP)"
+INT<-data$"Real interest rate (%)" 
+Year<-data$Year
+```
+ 
+ ##   Pre-estimation Test and Summary Statistics
+```{r}
+summary(data)
+```
+
+#### Standard Deviation 
+```{r}
+
+sd(GDP)
+sd(FDI)
+sd(INT)
+sd(TAX)
+
+```
+ 
+#### Ploting line graph for the variables 
+
+```{r}
+par(mfrow = c (2, 3))
+LGDP <- log(data$`FDI(% of GDP)` + 1)
+plot(Year, GDP, main="Time Trend for GDP)", type = "l", col = "Red", ylim = c(-10,10), xlab = "Year", ylab = "GDP" )
+plot(Year, LGDP, main="Time Trend for LOG GDP", type = "l", col = "Red", ylim = c(-10,10), xlab = "Year", ylab = "LGDP" )
+names(data)
+
+plot(Year, FDI, main="Time Trend for Foreign Direct investment", type = "l", col = "Red", ylim = c(-10,10), xlab = "Year", ylab = "FDI" )
+plot(Year, INT, main="Time Trend for real Interest Rate", type = "l", col = "Red", ylim = c(-10,20), xlab = "Year", ylab = "INT" )
+plot(Year, TAX, main="Time Trend for Tax Revenue", type = "l", col = "Red", ylim = c(-10,20), xlab = "Year", ylab = "TAX" )
+```
+
+#### Plotting Density Plot plot
+```{r}
+par(mfrow=c(2,2))
+plot(density(LGDP))
+plot(density(FDI))
+plot(density(TAX))
+plot(density(INT))
+```
+
+#### Plotting the Q-Q plots
+```{r}
+par(mfrow=c(2,2))
+qqnorm(LGDP)
+qqline(LGDP)
+qqnorm(FDI)
+qqline(FDI)
+qqnorm(TAX)
+qqline(TAX)
+qqnorm(INT)
+qqline(INT)
+
+```
+
+```{r}
+# Scatter plots for the data variables 
+par(mfrow=c(2,3))
+plot(LGDP,FDI)
+plot(LGDP,TAX)
+plot(LGDP,INT)
+
+```
+
+# Scatter plots for the data variables 
+```{r}
+par(mfrow=c(2,3))
+plot(LGDP,FDI)
+plot(LGDP,TAX)
+plot(LGDP,INT)
+```
+
+## Correlation between the variables
+```{r}
+cor(LGDP,FDI)
+cor(LGDP,TAX)
+cor(LGDP,INT)
+```
+
+### Linear Regression without interactions
+```{r}
+
+result<-lm(LGDP~FDI+TAX+INT,data = data);result
+summary(result)
+```
+
+## # Best linear model without interaction terms using backward reduction
+```{r}
+
+reduce<-step(result,direction = "backward")
+summary(reduce)
+```
+
+# Best linear model without interaction terms using forward selection
+```{r}
+min<-lm(GDP~1)
+forward<-step(min,direction = "forward",scope = LGDP ~ FDI + TAX + INT)
+summary(forward)
+```
+
+## Linear Regression Result with two interactions terms
+```{r}
+
+result2<-lm(LGDP~(FDI+TAX+INT)^2,data = data);result2
+summary(result2)
+
+```
+
+## Best linear model with two interaction terms using backward reduction
+```{r}
+reduce2<-step(result2,direction = "backward")
+summary(reduce2)
+```
+
